@@ -11,7 +11,7 @@ set(Boost_USE_MULTITHREADED ON)
 
 
 if (MSVC)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W4 /wd4100 /bigobj /D _WIN32_WINNT=0x0601 /D_SCL_SECURE_NO_WARNINGS=1 /D_CRT_SECURE_NO_WARNINGS=1")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W4 /wd4100 /wd4131 /wd4127 /wd4244 /bigobj /D _WIN32_WINNT=0x0601 /D_SCL_SECURE_NO_WARNINGS=1 /D_CRT_SECURE_NO_WARNINGS=1")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
 
     # Workaround for MSVC having two boost versions - x86 and x64 on same PC in stage folders
@@ -109,6 +109,31 @@ file(GLOB_RECURSE EXTRAS_INCLUDES
     ${PROJECT_SOURCE_DIR}/extras/beast/*.hpp
     ${PROJECT_SOURCE_DIR}/extras/beast/*.ipp
 )
+
+set (ZLIB_SOURCES
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/adler32.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/compress.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/crc32.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/deflate.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/infback.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/inffast.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/inflate.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/inftrees.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/trees.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/uncompr.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/zutil.c
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/crc32.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/deflate.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/gzguts.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/inffast.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/inffixed.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/inflate.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/inftrees.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/trees.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/zconf.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/zlib.h
+    ${PROJECT_SOURCE_DIR}/include/beast/core/detail/zlib/zutil.h
+    )
 
 add_subdirectory (examples)
 add_subdirectory (test)
