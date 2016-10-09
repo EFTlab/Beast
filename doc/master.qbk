@@ -49,8 +49,7 @@ provides implementations of the HTTP and WebSocket protocols.
   [[
     [link beast.overview Overview]
   ][
-    An overview of features, requirements, and credits, plus
-    rationale and design information.
+    An introduction wsth features, requirements, and credits.
   ]]
   [[
     [link beast.http Using HTTP]
@@ -68,6 +67,12 @@ provides implementations of the HTTP and WebSocket protocols.
     Examples that illustrate the use of Beast in more complex applications.
   ]]
   [[
+    [link beast.design Design]
+  ][
+    Design rationale, answers to review questions, and
+    other library comparisons.
+  ]]
+  [[
     [link beast.ref Reference]
   ][
     Detailed class and function reference.
@@ -83,7 +88,6 @@ provides implementations of the HTTP and WebSocket protocols.
 [include http.qbk]
 [include websocket.qbk]
 [include examples.qbk]
-
 [include design.qbk]
 
 [section:ref Reference]
