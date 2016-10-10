@@ -30,7 +30,10 @@ In this table:
     [`X::const_iterator`]
     []
     [
-        A type that meets the requirements of @b ForwardIterator.
+        A type that meets the requirements of @b ForwardIterator, except
+        that, for two user-defined dereferenceable iterators `a` and `b`
+        where `a == b`, there is no requirement that `a` and `b` are bound
+        to the same object.
     ]
 ]
 [
