@@ -186,7 +186,7 @@ static std::uint64_t constexpr no_content_length =
     @li `skip` The parser should skip the body. For example, this is
         used when sending a response to a HEAD request.
 
-    @li `upgrade` The parser should skip ths body, this is an
+    @li `upgrade` The parser should skip this body; its an
         upgrade to a different protocol.
 
     @li `pause` The parser should preserve the parsing state and
