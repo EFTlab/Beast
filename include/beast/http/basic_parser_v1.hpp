@@ -505,8 +505,11 @@ private:
     bool
     needs_eof(std::false_type) const;
 
+    template<class...>
+    using void_t = void;
+
     template<class C>
-    class has_on_start_t
+    class check_on_start_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_start(
@@ -520,11 +523,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_start =
-        std::integral_constant<bool, has_on_start_t<C>::value>;
+    using check_on_start =
+        std::integral_constant<bool, check_on_start_t<C>::value>;
 
     template<class C>
-    class has_on_method_t
+    class check_on_method_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_method(
@@ -539,11 +542,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_method =
-        std::integral_constant<bool, has_on_method_t<C>::value>;
+    using check_on_method =
+        std::integral_constant<bool, check_on_method_t<C>::value>;
 
     template<class C>
-    class has_on_uri_t
+    class check_on_uri_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_uri(
@@ -558,11 +561,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_uri =
-        std::integral_constant<bool, has_on_uri_t<C>::value>;
+    using check_on_uri =
+        std::integral_constant<bool, check_on_uri_t<C>::value>;
 
     template<class C>
-    class has_on_reason_t
+    class check_on_reason_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_reason(
@@ -577,11 +580,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_reason =
-        std::integral_constant<bool, has_on_reason_t<C>::value>;
+    using check_on_reason =
+        std::integral_constant<bool, check_on_reason_t<C>::value>;
 
     template<class C>
-    class has_on_request_t
+    class check_on_request_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_request(
@@ -595,11 +598,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_request =
-        std::integral_constant<bool, has_on_request_t<C>::value>;
+    using check_on_request =
+        std::integral_constant<bool, check_on_request_t<C>::value>;
 
     template<class C>
-    class has_on_response_t
+    class check_on_response_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_response(
@@ -613,11 +616,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_response =
-        std::integral_constant<bool, has_on_response_t<C>::value>;
+    using check_on_response =
+        std::integral_constant<bool, check_on_response_t<C>::value>;
 
     template<class C>
-    class has_on_field_t
+    class check_on_field_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_uri(
@@ -632,11 +635,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_field =
-        std::integral_constant<bool, has_on_field_t<C>::value>;
+    using check_on_field =
+        std::integral_constant<bool, check_on_field_t<C>::value>;
 
     template<class C>
-    class has_on_value_t
+    class check_on_value_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_uri(
@@ -651,11 +654,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_value =
-        std::integral_constant<bool, has_on_value_t<C>::value>;
+    using check_on_value =
+        std::integral_constant<bool, check_on_value_t<C>::value>;
 
     template<class C>
-    class has_on_headers_t
+    class check_on_headers_t
     {
         template<class T, class R = std::is_convertible<body_what,
             decltype(std::declval<T>().on_headers(
@@ -668,11 +671,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_headers =
-        std::integral_constant<bool, has_on_headers_t<C>::value>;
+    using check_on_headers =
+        std::integral_constant<bool, check_on_headers_t<C>::value>;
 
     template<class C>
-    class has_on_body_t
+    class check_on_body_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_body(
@@ -687,11 +690,11 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_body =
-        std::integral_constant<bool, has_on_body_t<C>::value>;
+    using check_on_body =
+        std::integral_constant<bool, check_on_body_t<C>::value>;
 
     template<class C>
-    class has_on_complete_t
+    class check_on_complete_t
     {
         template<class T, class R =
             decltype(std::declval<T>().on_complete(
@@ -705,11 +708,15 @@ private:
         static bool const value = type::value;
     };
     template<class C>
-    using has_on_complete =
-        std::integral_constant<bool, has_on_complete_t<C>::value>;
+    using check_on_complete =
+        std::integral_constant<bool, check_on_complete_t<C>::value>;
+
+#undef BEAST_HAS_MEMBER
 
     void call_on_start(error_code& ec, std::true_type)
     {
+        static_assert(check_on_start<Derived>::value,
+            "on_start requirements not met");
         impl().on_start(ec);
     }
 
@@ -719,12 +726,15 @@ private:
 
     void call_on_start(error_code& ec)
     {
-        call_on_start(ec, has_on_start<Derived>{});
+        call_on_start(ec, std::is_member_function_pointer<
+            decltype(&Derived::on_start)>{});
     }
 
     void call_on_method(error_code& ec,
         boost::string_ref const& s, std::true_type)
     {
+        static_assert(check_on_method<Derived>::value,
+            "on_method requirements not met");
         impl().on_method(s, ec);
     }
 
@@ -740,7 +750,8 @@ private:
         {
             h_left_ -= s.size();
             call_on_method(ec, s, std::integral_constant<bool,
-                isRequest && has_on_method<Derived>::value>{});
+                isRequest && std::is_member_function_pointer<
+                    decltype(&Derived::on_method)>::value>{});
         }
         else
         {
@@ -751,6 +762,8 @@ private:
     void call_on_uri(error_code& ec,
         boost::string_ref const& s, std::true_type)
     {
+        static_assert(check_on_uri<Derived>::value,
+            "on_uri requirements not met");
         impl().on_uri(s, ec);
     }
 
@@ -765,7 +778,8 @@ private:
         {
             h_left_ -= s.size();
             call_on_uri(ec, s, std::integral_constant<bool,
-                isRequest && has_on_uri<Derived>::value>{});
+                isRequest && std::is_member_function_pointer<
+                    decltype(&Derived::on_uri)>::value>{});
         }
         else
         {
@@ -776,6 +790,8 @@ private:
     void call_on_reason(error_code& ec,
         boost::string_ref const& s, std::true_type)
     {
+        static_assert(check_on_reason<Derived>::value,
+            "on_reason requirements not met");
         impl().on_reason(s, ec);
     }
 
@@ -790,7 +806,8 @@ private:
         {
             h_left_ -= s.size();
             call_on_reason(ec, s, std::integral_constant<bool,
-                ! isRequest && has_on_reason<Derived>::value>{});
+                ! isRequest && std::is_member_function_pointer<
+                    decltype(&Derived::on_reason)>::value>{});
         }
         else
         {
@@ -800,6 +817,8 @@ private:
 
     void call_on_request(error_code& ec, std::true_type)
     {
+        static_assert(check_on_request<Derived>::value,
+            "on_request requirements not met");
         impl().on_request(ec);
     }
 
@@ -810,11 +829,14 @@ private:
     void call_on_request(error_code& ec)
     {
         call_on_request(ec, std::integral_constant<bool,
-            isRequest && has_on_request<Derived>::value>{});
+            isRequest && std::is_member_function_pointer<
+                decltype(&Derived::on_request)>::value>{});
     }
 
     void call_on_response(error_code& ec, std::true_type)
     {
+        static_assert(check_on_response<Derived>::value,
+            "on_response requirements not met");
         impl().on_response(ec);
     }
 
@@ -825,12 +847,15 @@ private:
     void call_on_response(error_code& ec)
     {
         call_on_response(ec, std::integral_constant<bool,
-            ! isRequest && has_on_response<Derived>::value>{});
+            ! isRequest && std::is_member_function_pointer<
+                decltype(&Derived::on_response)>::value>{});
     }
 
     void call_on_field(error_code& ec,
         boost::string_ref const& s, std::true_type)
     {
+        static_assert(check_on_field<Derived>::value,
+            "on_field requirements not met");
         impl().on_field(s, ec);
     }
 
@@ -844,7 +869,9 @@ private:
         if(! h_max_ || s.size() <= h_left_)
         {
             h_left_ -= s.size();
-            call_on_field(ec, s, has_on_field<Derived>{});
+            call_on_field(ec, s,
+                std::is_member_function_pointer<
+                decltype(&Derived::on_field)>{});
         }
         else
         {
@@ -855,6 +882,8 @@ private:
     void call_on_value(error_code& ec,
         boost::string_ref const& s, std::true_type)
     {
+        static_assert(check_on_value<Derived>::value,
+            "on_value requirements not met");
         impl().on_value(s, ec);
     }
 
@@ -868,7 +897,9 @@ private:
         if(! h_max_ || s.size() <= h_left_)
         {
             h_left_ -= s.size();
-            call_on_value(ec, s, has_on_value<Derived>{});
+            call_on_value(ec, s,
+                std::is_member_function_pointer<
+                    decltype(&Derived::on_value)>{});
         }
         else
         {
@@ -880,6 +911,8 @@ private:
     call_on_headers(error_code& ec,
         std::uint64_t content_length, std::true_type)
     {
+        static_assert(check_on_headers<Derived>::value,
+            "on_headers requirements not met");
         return impl().on_headers(content_length, ec);
     }
 
@@ -893,12 +926,15 @@ private:
     call_on_headers(error_code& ec)
     {
         return call_on_headers(ec, content_length_,
-            has_on_headers<Derived>{});
+            std::is_member_function_pointer<
+                decltype(&Derived::on_headers)>{});
     }
 
     void call_on_body(error_code& ec,
         boost::string_ref const& s, std::true_type)
     {
+        static_assert(check_on_body<Derived>::value,
+            "on_body requirements not met");
         impl().on_body(s, ec);
     }
 
@@ -912,7 +948,9 @@ private:
         if(! b_max_ || s.size() <= b_left_)
         {
             b_left_ -= s.size();
-            call_on_body(ec, s, has_on_body<Derived>{});
+            call_on_body(ec, s,
+                std::is_member_function_pointer<
+                    decltype(&Derived::on_body)>{});
         }
         else
         {
@@ -922,6 +960,8 @@ private:
 
     void call_on_complete(error_code& ec, std::true_type)
     {
+        static_assert(check_on_complete<Derived>::value,
+            "on_complete requirements not met");
         impl().on_complete(ec);
     }
 
@@ -931,7 +971,8 @@ private:
 
     void call_on_complete(error_code& ec)
     {
-        call_on_complete(ec, has_on_complete<Derived>{});
+        call_on_complete(ec, std::is_member_function_pointer<
+            decltype(&Derived::on_complete)>{});
     }
 };
 
