@@ -80,6 +80,34 @@ struct body_max_size
     }
 };
 
+/** A value indicating how the parser should treat the body.
+
+    This value is returned from the `on_headers` callback in
+    the derived class. It controls what the parser does next
+    in terms of the message body.
+*/
+enum class body_what
+{
+    /// Continue reading the body.
+    normal,
+
+    /// Do not expect a body (parsing will complete).
+    skip,
+
+    /// This is an UPGRADE request (parsing will complete).
+    upgrade,
+
+    /** Return from the parser immediately.
+
+        This is used to return control to the function invoking
+        the parser, after all the headers have been read in.
+        The state of the parser is preserved; a subsequent
+        call to provide input data will resume parsing at the
+        beginning of the message body.
+    */
+    pause
+};
+
 /// The value returned when no content length is known or applicable.
 static std::uint64_t constexpr no_content_length =
     std::numeric_limits<std::uint64_t>::max();
@@ -133,7 +161,7 @@ static std::uint64_t constexpr no_content_length =
 
         Called for each piece of the current header value.
 
-    @li `int on_headers(std::uint64_t content_length, error_code&)`
+    @li `body_what on_headers(std::uint64_t content_length, error_code&)`
 
         Called when all the headers have been parsed successfully.
 
@@ -153,13 +181,16 @@ static std::uint64_t constexpr no_content_length =
     The return value of `on_headers` is special, it controls whether
     or not the parser should expect a body. These are the return values:
 
-    @li *0* The parser should expect a body
+    @li `normal` The parser should expect a body
 
-    @li *1* The parser should skip the body. For example, this is
+    @li `skip` The parser should skip the body. For example, this is
         used when sending a response to a HEAD request.
 
-    @li *2* The parser should skip ths body, this is an
+    @li `upgrade` The parser should skip ths body, this is an
         upgrade to a different protocol.
+
+    @li `pause` The parser should preserve the parsing state and
+        return control to the caller.
 
     The parser uses traits to determine if the callback is possible.
     If the Derived type omits one or more callbacks, they are simply
@@ -626,7 +657,7 @@ private:
     template<class C>
     class has_on_headers_t
     {
-        template<class T, class R = std::is_same<int,
+        template<class T, class R = std::is_convertible<body_what,
             decltype(std::declval<T>().on_headers(
                 std::declval<std::uint64_t>(), std::declval<error_code&>()))>>
         static R check(int);
@@ -845,18 +876,21 @@ private:
         }
     }
 
-    int call_on_headers(error_code& ec,
+    body_what
+    call_on_headers(error_code& ec,
         std::uint64_t content_length, std::true_type)
     {
         return impl().on_headers(content_length, ec);
     }
 
-    int call_on_headers(error_code& ec, std::uint64_t, std::false_type)
+    body_what
+    call_on_headers(error_code& ec, std::uint64_t, std::false_type)
     {
-        return 0;
+        return body_what::normal;
     }
 
-    int call_on_headers(error_code& ec)
+    body_what
+    call_on_headers(error_code& ec)
     {
         return call_on_headers(ec, content_length_,
             has_on_headers<Derived>{});
